@@ -7,7 +7,7 @@ THREADS=$3
 READA=$4
 READB=$5
 
-${INSTALL_DIR}/flash -r 175 -f 274 -s 20 -o ${ID}.merged -t $THREADS $READA $READB > ${ID}.merged.log
+flash -r 175 -f 274 -s 20 -o ${ID}.merged -t $THREADS $READA $READB > ${ID}.merged.log
 perl ${INSTALL_DIR}/rev_c.pl ${ID}.merged.extendedFrags.fastq > ${ID}.merged.rc.fastq
 perl ${INSTALL_DIR}/fq2fa.pl ${ID}.merged.rc.fastq > ${ID}.merged.rc.fasta
 perl ${INSTALL_DIR}/matchadapter_v3.pl ${ID}.merged.rc.fasta ${ID}.merged.rc
