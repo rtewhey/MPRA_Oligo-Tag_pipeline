@@ -10,7 +10,7 @@ READB=$5
 flash -r 175 -f 274 -s 20 -o ${ID}.merged -t $THREADS $READA $READB > ${ID}.merged.log
 perl ${INSTALL_DIR}/rev_c.pl ${ID}.merged.extendedFrags.fastq > ${ID}.merged.rc.fastq
 perl ${INSTALL_DIR}/fq2fa.pl ${ID}.merged.rc.fastq > ${ID}.merged.rc.fasta
-perl ${INSTALL_DIR}/matchadapter_v3.pl ${ID}.merged.rc.fasta ${ID}.merged.rc
+perl ${INSTALL_DIR}/matchadapter.pl ${ID}.merged.rc.fasta ${ID}.merged.rc
 awk '{print ">"$1"#"$5"\n"$4}' ${ID}.merged.rc.match > ${ID}.merged.rc.match.enh.fa
 bwa mem  -L 100 -k 8 -O 5 -t $THREADS -M $REF ${ID}.merged.rc.match.enh.fa > ${ID}.merged.rc.match.enh.sam 2> ${ID}.merged.rc.match.enh.bwa.log
 perl ${INSTALL_DIR}/SAM2MPRA.pl ${ID}.merged.rc.match.enh.sam ${ID}.merged.rc.match.enh.mapped
