@@ -3,5 +3,12 @@
 Dependencies
   * BWA MEM (http://bio-bwa.sourceforge.net/)
   * FLASH (https://sourceforge.net/projects/flashpage/)
+
+Required Setup
+  * BWA and FLASH executables need to be in your PATH 
+  * Update run.VectorReconstruction_MPRA.sh so INSTALL_PATH points to the scripts folder
+  * Fasta file of oligo sequences needs to be indexed using BWA
   
-Update run.VectorReconstruction_MPRA.sh so PATH points to the scripts folder 
+Syntax
+
+run.VectorReconstruction_MPRA.sh [Oligo Sequence Fasta] [ID for Output files] [CPU Threads] [Illumina FASTQ Read 1] [Illumina FASTQ Read 2]
