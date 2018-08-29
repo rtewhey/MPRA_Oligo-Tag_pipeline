@@ -118,7 +118,7 @@ while (<FASTA>)
 			 
 			if($cigar ne "*" && $size > 0)
 				{
-				$score = sprintf("%.2f", $mismatch/$size);
+				$score = sprintf("%.3f", $mismatch/$size);
 
 				#print join("\t",$id[0],$id[1],$bitflag[7],$line[2],$line[4],$size,$line[5],$score,$seq_correct_ori,"Secondary")."\n"  if($bitflag[3] == 1); #Secondary Alignments
 				
