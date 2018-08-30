@@ -34,11 +34,18 @@ my $seq_correct_ori;
 my $updated_chr;
 my @split_ID;
 my $score;
+my $parse_col;
+my $md_col;
+my $md_col_part;
+my $md_col_unchanged;
+my $mismatch_all;
+my $score_all;
 
 while (<FASTA>)
 	{
 	$_ =~ s/[\n\r]//g;
 	my @line = split(/\t/);
+	
 	if($line[0] =~ /^@/)
 		{
 		$line[1] =~ s/SN://;
@@ -60,6 +67,14 @@ while (<FASTA>)
 		 $size = 0;
 		 $size = $chr_size{$chr} if(exists $chr_size{$chr});
 		 
+
+		###Parse MD for mismatches
+		foreach $parse_col (@line)
+			{
+			$md_col = $parse_col if($parse_col =~ m/^MD:Z:/);
+			$md_col =~ s/^MD:Z:// if($parse_col =~ m/^MD:Z:/);
+			}	
+				
 		 #ParseFlag $bitflag[7] eq strand (1=neg, 0=pos)
 		 @bitflag = split(//,sprintf('%012b',$line[1]));
 		 
@@ -92,9 +107,9 @@ while (<FASTA>)
 					$mismatch += $1;
 					}
 				 elsif ($cigar_part =~ /(\d+)H/)
-                                        {
-                                        $mismatch += $1;
-                                        }
+                    {
+                    $mismatch += $1;
+                    }
 				 else
 				 	{
 				 	die "Unexpected cigar: $cigar_unchanged\n";
@@ -112,6 +127,38 @@ while (<FASTA>)
 				}
 			 }
 			 
+			 
+			 
+			 $mismatch_all=0;
+
+			 $md_col_unchanged = $md_col;
+			 while ($md_col !~ /^$/)
+			 	{
+				if ($md_col =~ /^(\d+)/)
+					{
+					$md_col_part = $1;
+					$md_col =~ s/^$md_col_part//;
+					}	
+				elsif ($md_col =~ /^\^([a-zA-Z]+)/)
+					{
+					$md_col_part = $1;
+					$md_col =~ s/^\^$md_col_part//;
+					}
+				elsif ($md_col =~ /^([a-zA-Z]+)/)
+					{
+					$mismatch_all += length($1);
+					$md_col_part = $1;
+					$md_col =~ s/^$md_col_part//;
+					}
+				else
+					{
+					die "Unexpected MD: $md_col $md_col_unchanged\n";
+					}
+				}
+			 	
+			 
+			 
+			 
 			 	$updated_chr = $line[2];
 				@split_ID=split(/_/,$line[2]) if($bitflag[7] == 1);
 				$updated_chr = $split_ID[0]."_RC_".join("_",splice(@split_ID,1)) if($bitflag[7] == 1);
@@ -119,21 +166,22 @@ while (<FASTA>)
 			if($cigar ne "*" && $size > 0)
 				{
 				$score = sprintf("%.3f", $mismatch/$size);
-
+				$score_all = sprintf("%.3f", ($mismatch+$mismatch_all)/$size);
+				
 				#print join("\t",$id[0],$id[1],$bitflag[7],$line[2],$line[4],$size,$line[5],$score,$seq_correct_ori,"Secondary")."\n"  if($bitflag[3] == 1); #Secondary Alignments
 				
-				if($score <= $score_cutoff)
+				if($score_all <= $score_cutoff)
 					{
-					print MATCH join("\t",$id[0],$id[1],$bitflag[7],$updated_chr,$line[2],$line[4],$size,$line[5],$score,$seq_correct_ori,"PASS")."\n"  if($bitflag[3] == 0);
+					print MATCH join("\t",$id[0],$id[1],$bitflag[7],$updated_chr,$line[2],$line[4],$size,$line[5],$score_all,$seq_correct_ori,"PASS",$score,$md_col_unchanged)."\n"  if($bitflag[3] == 0);
 					}
 				else
 					{
-					print MATCH join("\t",$id[0],$id[1],$bitflag[7],$updated_chr,$line[2],$line[4],$size,$line[5],$score,$seq_correct_ori,"FAIL")."\n"  if($bitflag[3] == 0);
+					print MATCH join("\t",$id[0],$id[1],$bitflag[7],$updated_chr,$line[2],$line[4],$size,$line[5],$score_all,$seq_correct_ori,"FAIL",$score,$md_col_unchanged)."\n"  if($bitflag[3] == 0);
 					}
 				}
 			else
 				{
-				print MATCH join("\t",$id[0],$id[1],$bitflag[7],$updated_chr,$line[2],$line[4],$size,$line[5],"-",$seq_correct_ori,"FAIL")."\n";
+				print MATCH join("\t",$id[0],$id[1],$bitflag[7],$updated_chr,$line[2],$line[4],$size,$line[5],"-",$seq_correct_ori,"FAIL",$score,$md_col_unchanged)."\n";
 				}
 		}
 	}
