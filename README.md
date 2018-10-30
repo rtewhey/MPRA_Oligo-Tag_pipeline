@@ -12,3 +12,7 @@ Required Setup
 Syntax
 
 run.VectorReconstruction_MPRA.sh [Oligo Sequence Fasta] [ID for Output files] [CPU Threads] [Illumina FASTQ Read 1] [Illumina FASTQ Read 2]
+
+
+**WARNING**
+This pipeline can change without notice. I will try my best to make it backwards compatable.
