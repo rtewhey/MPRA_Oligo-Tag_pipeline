@@ -67,7 +67,7 @@ while (<FASTA>)
 		 $size = 0;
 		 $size = $chr_size{$chr} if(exists $chr_size{$chr});
 		 
-
+		$md_col = "*";
 		###Parse MD for mismatches
 		foreach $parse_col (@line)
 			{
@@ -162,7 +162,9 @@ while (<FASTA>)
 			 	$updated_chr = $line[2];
 				@split_ID=split(/_/,$line[2]) if($bitflag[7] == 1);
 				$updated_chr = $split_ID[0]."_RC_".join("_",splice(@split_ID,1)) if($bitflag[7] == 1);
-			 
+				
+				$score = "NA";
+				$score_all = "NA";
 			if($cigar ne "*" && $size > 0)
 				{
 				$score = sprintf("%.3f", $mismatch/$size);
