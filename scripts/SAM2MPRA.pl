@@ -150,7 +150,7 @@ while (<FASTA>)
 					$md_col_part = $1;
 					$md_col =~ s/^$md_col_part//;
 					}
-				elsif ($cigar eq "*")
+				elsif ($md_col eq "*")
 					{
 					# Unmapped Read
 					$md_col =~ s/\*//
