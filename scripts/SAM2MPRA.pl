@@ -152,7 +152,7 @@ while (<FASTA>)
 					}
 				elsif ($cigar eq "*")
 					{
-					#Unmapped Read
+					# Unmapped Read
 					$md_col =~ s/\*//
 					}
 				else
