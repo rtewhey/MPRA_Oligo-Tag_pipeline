@@ -150,6 +150,11 @@ while (<FASTA>)
 					$md_col_part = $1;
 					$md_col =~ s/^$md_col_part//;
 					}
+				elsif ($cigar eq "*")
+					{
+					#Unmapped Read
+					$md_col =~ s/\*//
+					}
 				else
 					{
 					die "Unexpected MD: $md_col $md_col_unchanged\n";
