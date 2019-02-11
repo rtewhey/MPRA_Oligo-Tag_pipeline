@@ -3,9 +3,10 @@
 Dependencies
   * BWA MEM (http://bio-bwa.sourceforge.net/)
   * FLASH (https://sourceforge.net/projects/flashpage/)
-
+  * Preseq (http://smithlabresearch.org/software/preseq/)
+  
 Required Setup
-  * BWA and FLASH executables need to be in your PATH 
+  * BWA, FLASH & Preseq executables need to be in your PATH 
   * Update run.VectorReconstruction_MPRA.sh so INSTALL_PATH points to the scripts folder
   * Fasta file of oligo sequences needs to be indexed using BWA
   
