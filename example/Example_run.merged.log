@@ -1,0 +1,44 @@
+[FLASH] Starting FLASH v2.2.00
+[FLASH] Fast Length Adjustment of SHort reads
+[FLASH]  
+[FLASH] Input files:
+[FLASH]     CMS-MPRA:dGFP_rep1.1.sample.fastq.gz
+[FLASH]     CMS-MPRA:dGFP_rep1.2.sample.fastq.gz
+[FLASH]  
+[FLASH] Output files:
+[FLASH]     ./Example_run.merged.extendedFrags.fastq
+[FLASH]     ./Example_run.merged.notCombined_1.fastq
+[FLASH]     ./Example_run.merged.notCombined_2.fastq
+[FLASH]     ./Example_run.merged.hist
+[FLASH]     ./Example_run.merged.histogram
+[FLASH]  
+[FLASH] Parameters:
+[FLASH]     Min overlap:           10
+[FLASH]     Min overlap outie:     35
+[FLASH]     Max overlap:           76
+[FLASH]     Max mismatch density:  0.250000
+[FLASH]     Allow "outie" pairs:   true
+[FLASH]     Cap mismatch quals:    false
+[FLASH]     Combiner threads:      1
+[FLASH]     Input format:          FASTQ, phred_offset=33
+[FLASH]     Output format:         FASTQ, phred_offset=33
+[FLASH]  
+[FLASH] Starting reader and writer threads
+[FLASH] Starting 1 combiner threads
+[FLASH] Processed 2500 read pairs
+[FLASH]  
+[FLASH] Read combination statistics:
+[FLASH]     Total pairs:       2500
+[FLASH]     Discarded pairs:   0
+[FLASH]     Percent Discarded: 0.00%
+[FLASH]     Combined pairs:    2451
+[FLASH]         Innie pairs:   2166 (88.37% of combined)
+[FLASH]         Outie pairs:   285 (11.63% of combined)
+[FLASH]     Uncombined pairs:  49
+[FLASH]     Percent combined:  98.04%
+[FLASH]  
+[FLASH] Writing histogram files.
+[FLASH]  
+[FLASH] FLASH v2.2.00 complete!
+[FLASH] 0.128 seconds elapsed
+[FLASH] Finished with 1 warning (see above)
