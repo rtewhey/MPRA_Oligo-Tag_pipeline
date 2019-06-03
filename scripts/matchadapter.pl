@@ -12,6 +12,10 @@ open (FASTA, "$fasta") or die("ERROR: can not read file ($fasta): $!\n");
 open (MATCH, ">$out".".match") or die("ERROR: can not create $out .matched: $!\n");
 open (REJECT, ">$out".".reject") or die("ERROR: can not create $out .rejected: $!\n");
 
+
+my $no_L1_match = 1;
+my $no_L2_match = 1;
+
 my $L1_SEQ = "AACTGGCCGCTTGACG";
 my $L1_SEQ_ANCHOR = "CG";
 my $L1_SEQ_ANCHOR_POS = 14;
@@ -21,10 +25,10 @@ my $L2_SEQ_LEFT_ANCHOR = "CA";
 my $L2_SEQ_BARCODE_LEN= 20;
 my $L2_SEQ_POS = 216;
 
-my $MIN_SEQ_SIZE = 100;
+my $MIN_SEQ_SIZE = 50;
 
-my $MIN_ENH_SIZE = 150;
-my $MAX_ENH_SIZE = 200;
+my $MIN_ENH_SIZE = 50;
+my $MAX_ENH_SIZE = 210;
 
 my $r1;
 my $id;
@@ -63,6 +67,7 @@ while (<FASTA>)
 	$match1 = -9;
 	if(substr($r1,$L1_SEQ_ANCHOR_POS,length($L1_SEQ_ANCHOR)) eq $L1_SEQ_ANCHOR) #Anchor match
 		{
+		$match1 = 0 if($no_L1_match ==  1);		
 		$match1 = 0 if(abs(distance($L1_SEQ, substr($r1,0,length($L1_SEQ)))) <= $match_dist);
 		}
 	else
@@ -86,6 +91,11 @@ MATCH1:
 					last MATCH1;
 					}	
 				}
+			elsif($no_L1_match == 1)
+				{
+					$match1 = 0.0;
+					last MATCH1;				
+				}
 			}
 		}
 		
@@ -96,8 +106,8 @@ MATCH1:
 	$dist = -9;
 	if(substr($r1,-$L2_SEQ_BARCODE_LEN-length($L2_SEQ_ANCHOR),length($L2_SEQ_ANCHOR)) eq $L2_SEQ_ANCHOR) #Anchor match
 		{
-		
-		$match2 = -99;		
+		$match2 = -99;
+		$match2 = 0.0 if($no_L2_match == 1);		
 MATCH2:
 		for($i=0;$i<=$anchor_wiggle;$i++)
 			{
@@ -119,13 +129,24 @@ MATCH2:
 				$dist = distance($L2_SEQ, substr($r1,length($r1)-$L2_SEQ_BARCODE_LEN-length($L2_SEQ)-$match2,length($L2_SEQ)+$match2));
 				#Matched internal adapter
 				}
+			elsif($no_L2_match == 1)
+				{
+				$dist = distance($L2_SEQ, substr($r1,length($r1)-$L2_SEQ_BARCODE_LEN-length($L2_SEQ)-$match2,length($L2_SEQ)+$match2));
+				$match2 = 0.0;
+				}	
 			else
 				{
 				$match2 = -999
 				}
 			}
 		}
-		
+	  elsif($no_L2_match == 1)
+		{
+			$match2 = 0.0;
+		}
+	
+	
+	
 	if($match1 != -9 && $match2 > -9)
 		{
 		$L2_match_len = length($L2_SEQ)+$match2;
@@ -151,4 +172,3 @@ MATCH2:
 		}
 }
 close FASTA;
-
