@@ -1,4 +1,4 @@
-INSTALL_PATH="/home/tewher/scripts"
+INSTALL_PATH=" /projects/tewher/bin/MPRA_Oligo-Tag_pipeline/scripts"
 
 REF=$1
 ID=$2
@@ -22,5 +22,4 @@ perl ${INSTALL_PATH}/Ct_seq.pl ${ID}.merged.rc.match.enh.mapped.enh.pass.sort 4 
 awk '{ct[$4]++}END{for (i in ct)print i "\t" ct[i]}' ${ID}.merged.rc.match.enh.mapped.barcode.ct | sort -k1n > ${ID}.merged.rc.match.enh.mapped.barcode.ct.hist
 preseq lc_extrap -H ${ID}.merged.rc.match.enh.mapped.barcode.ct.hist -o ${ID}.merged.rc.match.enh.mapped.barcode.ct.hist.preseq -s 10000000 -n 1000 -e 100000000
 awk '($5 == 0)' ${ID}.merged.rc.match.enh.mapped.barcode.ct | awk '{ct[$2]++}END{for(i in ct)print i "\t" ct[i]}' >  ${ID}.merged.rc.match.enh.mapped.barcode.ct.tagCt
-
-perl parse_map.pl ${ID}.merged.rc.match.enh.mapped.barcode.ct > ${ID}.merged.rc.match.enh.mapped.barcode.ct.parsed
+perl ${INSTALL_PATH}/parse_map.pl ${ID}.merged.rc.match.enh.mapped.barcode.ct > ${ID}.merged.rc.match.enh.mapped.barcode.ct.parsed
