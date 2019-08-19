@@ -25,7 +25,7 @@ my $L2_SEQ_LEFT_ANCHOR = "CA";
 my $L2_SEQ_BARCODE_LEN= 20;
 my $L2_SEQ_POS = 216;
 
-my $MIN_SEQ_SIZE = 50;
+my $MIN_SEQ_SIZE = 100;
 
 my $MIN_ENH_SIZE = 50;
 my $MAX_ENH_SIZE = 210;
