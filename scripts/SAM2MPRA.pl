@@ -3,10 +3,29 @@
 #by Ryan Tewhey
 use strict;
 use warnings;
+use Getopt::Std;
+
 ##################################
 #
 #4/27/2014 - Changed "RC" reporter to after SNP ID
 ##################################
+
+my %options=();
+getopts('C', \%options);
+
+#####
+#
+#-C = Use new cigar format =/M
+#####
+
+my $CIGAR_flag;
+
+if(exists($options{C}))
+	{
+	print STDERR "Using update CIGAR format =/M\n";
+	$CIGAR_flag = 1;
+	}
+else {$CIGAR_flag = 0;}
 
 my $sam = $ARGV[0];
 my $out = $ARGV[1];
@@ -40,6 +59,7 @@ my $md_col_part;
 my $md_col_unchanged;
 my $mismatch_all;
 my $score_all;
+my $cigar_substitution;
 
 while (<FASTA>)
 	{
@@ -84,13 +104,15 @@ while (<FASTA>)
 		 
 		 $match = 0;
 		 $mismatch = 0;
-
+		 $cigar_substitution=0;
+		 
+		 
 		 while ($cigar !~ /^$/)
 			 {
 			 if ($cigar =~ /^([0-9]+[MIDSH])/)
 				 {
 				 $cigar_part = $1;
-				 if ($cigar_part =~ /(\d+)M/)
+				 if ($cigar_part =~ /(\d+)M/ || $cigar_part =~ /(\d+)=/)
 					{
 					$match += $1;
 					} 
@@ -109,6 +131,10 @@ while (<FASTA>)
 				 elsif ($cigar_part =~ /(\d+)H/)
                     {
                     $mismatch += $1;
+                    }
+				 elsif ($cigar_part =~ /(\d+)X/)
+                    {
+                    $cigar_substitution += $1;
                     }
 				 else
 				 	{
@@ -161,8 +187,11 @@ while (<FASTA>)
 					}
 				}
 			 	
-			 
-			 
+
+			   if($mismatch_all != $cigar_substitution && $CIGAR_flag==1)
+			   	{
+			   	print STDERR "Substitutions from CIGAR and MD tag are discordant:\n\t$line[0] $cigar_unchanged $md_col_unchanged\n\t$cigar_substitution $mismatch_all\n";
+			   	}
 			 
 			 	$updated_chr = $line[2];
 				@split_ID=split(/_/,$line[2]) if($bitflag[7] == 1);
@@ -173,7 +202,8 @@ while (<FASTA>)
 			if($cigar ne "*" && $size > 0)
 				{
 				$score = sprintf("%.3f", $mismatch/$size);
-				$score_all = sprintf("%.3f", ($mismatch+$mismatch_all)/$size);
+				$score_all = sprintf("%.3f", ($mismatch+$mismatch_all)/$size) if($CIGAR_flag==0); 
+				$score_all = sprintf("%.3f", ($mismatch+$cigar_substitution)/$size) if($CIGAR_flag==1); 
 				
 				#print join("\t",$id[0],$id[1],$bitflag[7],$line[2],$line[4],$size,$line[5],$score,$seq_correct_ori,"Secondary")."\n"  if($bitflag[3] == 1); #Secondary Alignments
 				
