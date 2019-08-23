@@ -23,6 +23,11 @@ my @next;
 my $cur_barcode;
 my %cur_hits;
 
+my %cur_hits_score;
+my @print_score;
+my @tmp_sort;
+
+
 my $key;
 my $sum;
 my $pass_flag; # 0 = ok, 1 = collision, 2 = other failure (mapping)
@@ -45,10 +50,12 @@ while (<MAPPED>)
 	
 	$cur_barcode = $last[$CT_COL];
 	$cur_hits{$last[$CMP_COL]}++;
+	push(@{$cur_hits_score{$last[$CMP_COL]}},$line[8]);
 
 	while($last[$CT_COL] eq $line[$CT_COL] && !(eof))
 		{
 		$cur_hits{$line[$CMP_COL]}++;
+		push(@{$cur_hits_score{$last[$CMP_COL]}},$line[8]);
 		$pass_flag = 0 if($line[10] eq "PASS");
 		$tmp_line=<MAPPED>;
 		chomp $tmp_line;
@@ -60,6 +67,7 @@ while (<MAPPED>)
 		if($line[$CT_COL] eq $last[$CT_COL])
 			{
 			$cur_hits{$line[$CMP_COL]}++ if($line[$CT_COL] eq $last[$CT_COL]);
+			push(@{$cur_hits_score{$last[$CMP_COL]}},$line[8]);
 			$pass_flag = 0 if($line[10] eq "PASS");	
 			}
 		else  ## Run normal loop on last line
@@ -83,25 +91,43 @@ while (<MAPPED>)
 	
 			$cur_barcode = $last[$CT_COL];
 			$cur_hits{$last[$CMP_COL]}++;
+			$cur_hits_score{$last[$CMP_COL]}+=$line[8];
+			push(@{$cur_hits_score{$last[$CMP_COL]}},$line[8]);
 			}
 		
 		}
 
 	
-	@last = @line;
-	print "$cur_barcode\t";
-	print join(",",keys %cur_hits)."\t";
-	print join(",",values %cur_hits)."\t";	
-		
+
+
 	$sum = 0;
+	@print_keys=();
+	@print_values=();
+	@print_score=();
+	
 	for $key (keys %cur_hits)
-		{  
+		{
+		push(@print_keys,$key);
+		push(@print_values, $cur_hits{$key});
   		$sum += $cur_hits{$key};
+  		
+  		my @tmp_sort = sort {$a <=> $b} @{$cur_hits_score{$key}};
+  		
+  		push(@print_score,printf("%.3f",$tmp_sort[0]);
 		}
+	print "$cur_barcode\t";
+	print join(",",@print_keys)."\t";
+	print join(",",@print_values)."\t";		
 	print $sum."\t";
 	
 	$pass_flag = 1 if(scalar(keys %cur_hits) > 1);
-	print $pass_flag."\n";
+	print $pass_flag."\t";
+	print join(",",@print_score)."\n";
+
+
+	
 	
 	%cur_hits = ();
+	%cur_hits_score = ();
+	@last = @line;
 	}
