@@ -70,6 +70,9 @@ my $md_col_unchanged;
 my $mismatch_all;
 my $score_all;
 my $cigar_substitution;
+my $aln_length;
+my $unaln_length;
+my $aln_info;
 
 while (<FASTA>)
 	{
@@ -115,7 +118,7 @@ while (<FASTA>)
 		 $match = 0;
 		 $mismatch = 0;
 		 $cigar_substitution=0;
-		 
+		 $aln_length=0;
 		 
 		 while ($cigar !~ /^$/)
 			 {
@@ -125,10 +128,12 @@ while (<FASTA>)
 				 if ($cigar_part =~ /(\d+)M/)
 					{
 					$match += $1;
+					$aln_length += $1;
 					} 
-				 if ($cigar_part =~ /(\d+)=/)
+				 elsif ($cigar_part =~ /(\d+)=/)
 					{
 					$match += $1;
+					$aln_length += $1;
 					}
 				 elsif ($cigar_part =~ /(\d+)I/)
 					{
@@ -137,6 +142,7 @@ while (<FASTA>)
 				 elsif ($cigar_part =~ /(\d+)D/)
 					{
 					$mismatch += $1;
+					$aln_length += $1;
 					}
 				 elsif ($cigar_part =~ /(\d+)S/)
 					{
@@ -149,6 +155,7 @@ while (<FASTA>)
 				 elsif ($cigar_part =~ /(\d+)X/)
                     {
                     $cigar_substitution += $1;
+					$aln_length += $1;
                     }
 				 else
 				 	{
@@ -213,26 +220,32 @@ while (<FASTA>)
 				
 				$score = "NA";
 				$score_all = "NA";
+				$aln_info = "NA";
+				
 			if($cigar ne "*" && $size > 0 && ($line[1]==0 || $BIT_flag==0))
 				{
+				
+				$unaln_length=$size-$aln_length
 				$score = sprintf("%.3f", $mismatch/$size);
-				$score_all = sprintf("%.3f", ($mismatch+$mismatch_all)/$size) if($CIGAR_flag==0); 
-				$score_all = sprintf("%.3f", ($mismatch+$cigar_substitution)/$size) if($CIGAR_flag==1); 
+				$score_all = sprintf("%.3f", ($mismatch+$mismatch_all+$unaln_length)/$size) if($CIGAR_flag==0); 
+				$score_all = sprintf("%.3f", ($mismatch+$cigar_substitution+$unaln_length)/$size) if($CIGAR_flag==1); 
+				
+				$aln_info=$line[3].":".$aln_length;
 				
 				#print join("\t",$id[0],$id[1],$bitflag[7],$line[2],$line[4],$size,$line[5],$score,$seq_correct_ori,"Secondary")."\n"  if($bitflag[3] == 1); #Secondary Alignments
 				
 				if($score_all <= $score_cutoff)
 					{
-					print MATCH join("\t",$id[0],$id[1],$bitflag[7],$updated_chr,$line[2],$line[4],$size,$line[5],$score_all,$seq_correct_ori,"PASS",$score,$md_col_unchanged)."\n"  if($bitflag[3] == 0);
+					print MATCH join("\t",$id[0],$id[1],$bitflag[7],$updated_chr,$line[2],$line[4],$size,$line[5],$score_all,$seq_correct_ori,"PASS",$score,$md_col_unchanged,$aln_info,)."\n"  if($bitflag[3] == 0);
 					}
 				else
 					{
-					print MATCH join("\t",$id[0],$id[1],$bitflag[7],$updated_chr,$line[2],$line[4],$size,$line[5],$score_all,$seq_correct_ori,"FAIL",$score,$md_col_unchanged)."\n"  if($bitflag[3] == 0);
+					print MATCH join("\t",$id[0],$id[1],$bitflag[7],$updated_chr,$line[2],$line[4],$size,$line[5],$score_all,$seq_correct_ori,"FAIL",$score,$md_col_unchanged,$aln_info)."\n"  if($bitflag[3] == 0);
 					}
 				}
 			else
 				{
-				print MATCH join("\t",$id[0],$id[1],$bitflag[7],$updated_chr,$line[2],$line[4],$size,$line[5],"-",$seq_correct_ori,"FAIL",$score,$md_col_unchanged)."\n";
+				print MATCH join("\t",$id[0],$id[1],$bitflag[7],$updated_chr,$line[2],$line[4],$size,$line[5],"-",$seq_correct_ori,"FAIL",$score,$md_col_unchanged,$aln_info)."\n";
 				}
 		}
 	}
