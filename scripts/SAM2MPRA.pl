@@ -16,6 +16,7 @@ getopts('C', \%options);
 #####
 #
 #-C = Use new cigar format =/M
+#-B = Filter for 0 bitflag
 #####
 
 my $CIGAR_flag;
@@ -26,6 +27,15 @@ if(exists($options{C}))
 	$CIGAR_flag = 1;
 	}
 else {$CIGAR_flag = 0;}
+
+my $BIT_flag;
+
+if(exists($options{B}))
+	{
+	print STDERR "Using only fwd mapping reads (BITFLAG=0)\n";
+	$BIT_flag = 1;
+	}
+else {$BIT_flag = 0;}
 
 my $sam = $ARGV[0];
 my $out = $ARGV[1];
@@ -199,7 +209,7 @@ while (<FASTA>)
 				
 				$score = "NA";
 				$score_all = "NA";
-			if($cigar ne "*" && $size > 0)
+			if($cigar ne "*" && $size > 0 && ($inline[1]==0 || $BIT_flag==0))
 				{
 				$score = sprintf("%.3f", $mismatch/$size);
 				$score_all = sprintf("%.3f", ($mismatch+$mismatch_all)/$size) if($CIGAR_flag==0); 
