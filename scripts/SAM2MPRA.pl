@@ -119,7 +119,7 @@ while (<FASTA>)
 		 
 		 while ($cigar !~ /^$/)
 			 {
-			 if ($cigar =~ /^([0-9]+[MIDSH])/)
+			 if ($cigar =~ /^([0-9]+[MIDSH=X])/)
 				 {
 				 $cigar_part = $1;
 				 if ($cigar_part =~ /(\d+)M/)
