@@ -236,7 +236,7 @@ while (<FASTA>)
 				
 				if($score_all <= $score_cutoff)
 					{
-					print MATCH join("\t",$id[0],$id[1],$bitflag[7],$updated_chr,$line[2],$line[4],$size,$line[5],$score_all,$seq_correct_ori,"PASS",$score,$md_col_unchanged,$aln_info,)."\n"  if($bitflag[3] == 0);
+					print MATCH join("\t",$id[0],$id[1],$bitflag[7],$updated_chr,$line[2],$line[4],$size,$line[5],$score_all,$seq_correct_ori,"PASS",$score,$md_col_unchanged,$aln_info)."\n"  if($bitflag[3] == 0);
 					}
 				else
 					{
