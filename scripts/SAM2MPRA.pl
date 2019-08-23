@@ -209,7 +209,7 @@ while (<FASTA>)
 				
 				$score = "NA";
 				$score_all = "NA";
-			if($cigar ne "*" && $size > 0 && ($inline[1]==0 || $BIT_flag==0))
+			if($cigar ne "*" && $size > 0 && ($line[1]==0 || $BIT_flag==0))
 				{
 				$score = sprintf("%.3f", $mismatch/$size);
 				$score_all = sprintf("%.3f", ($mismatch+$mismatch_all)/$size) if($CIGAR_flag==0); 
