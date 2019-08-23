@@ -225,7 +225,7 @@ while (<FASTA>)
 			if($cigar ne "*" && $size > 0 && ($line[1]==0 || $BIT_flag==0))
 				{
 				
-				$unaln_length=$size-$aln_length
+				$unaln_length=$size-$aln_length;
 				$score = sprintf("%.3f", $mismatch/$size);
 				$score_all = sprintf("%.3f", ($mismatch+$mismatch_all+$unaln_length)/$size) if($CIGAR_flag==0); 
 				$score_all = sprintf("%.3f", ($mismatch+$cigar_substitution+$unaln_length)/$size) if($CIGAR_flag==1); 
