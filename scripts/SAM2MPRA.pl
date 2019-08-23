@@ -122,7 +122,7 @@ while (<FASTA>)
 			 if ($cigar =~ /^([0-9]+[MIDSH])/)
 				 {
 				 $cigar_part = $1;
-				 if ($cigar_part =~ /(\d+)M/ || $cigar_part =~ /(\d+)=/)
+				 if ($cigar_part =~ /(\d+)M/ || $cigar_part =~ /(\d+)\=/)
 					{
 					$match += $1;
 					} 
