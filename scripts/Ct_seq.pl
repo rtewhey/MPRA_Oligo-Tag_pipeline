@@ -112,7 +112,8 @@ while (<MAPPED>)
 		push(@print_values, $cur_hits{$key});
   		$sum += $cur_hits{$key};
   		
-  		@tmp_sort = @{$cur_hits_score{$key}};
+  		push(@{$cur_hits_score{$key}},1);
+  		#@tmp_sort = @{$cur_hits_score{$key}};
   		my @tmp_sort = sort {$a <=> $b} @{$cur_hits_score{$key}} if(scalar @{$cur_hits_score{$key}} > 1);
   		
   		push(@print_score,printf("%.3f",$tmp_sort[0]));
