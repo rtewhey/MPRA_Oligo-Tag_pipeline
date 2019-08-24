@@ -120,6 +120,7 @@ while (<MAPPED>)
   		#@tmp_sort = @{$cur_hits_score{$key}};
   		my @tmp_sort = sort {$a <=> $b} @{$cur_hits_score{$key}} if(scalar @{$cur_hits_score{$key}} > 1);
   		
+  		join STDERR (",",@print_score);
   		push(@print_score,printf("%.3f",$tmp_sort[0]));
 		}
 	print "$cur_barcode\t";
