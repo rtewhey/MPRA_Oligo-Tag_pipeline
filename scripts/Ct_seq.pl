@@ -24,23 +24,27 @@ my $cur_barcode;
 my %cur_hits;
 
 my %cur_hits_score;
+my %cur_pass_flag;
 my @print_score;
 my @tmp_sort;
 my @print_keys;
 my @print_values;
+my @print_passflag;
 
 my $key;
 my $sum;
-my $pass_flag; # 0 = ok, 1 = collision, 2 = other failure (mapping)
+my $ct_pass_flag; # 0 = ok, 1 = collision, 2 = other failure (mapping)
+my $cmp_pass_flag; #0 = ok, 1 = failure
+
 my $aln_score;
 
 while (<MAPPED>)
 	{
-	$pass_flag = 2;
+	$ct_pass_flag = 2;
+	$cmp_pass_flag = 1;
+
 	chomp;
 	my @line = split(/\t/);
-	$aln_score=$line[8];
-	$aln_score=1 if($line[8] eq "-");
 	
 	if($first == 0)
 		{
@@ -49,59 +53,94 @@ while (<MAPPED>)
 		next;
 		}
 
-	$pass_flag = 0 if($last[10] eq "PASS");
+	$ct_pass_flag = 0 if($last[10] eq "PASS");
+	$cmp_pass_flag = 0 if($last[10] eq "PASS");
 	
 	$cur_barcode = $last[$CT_COL];
 	$cur_hits{$last[$CMP_COL]}++;
+	$aln_score=$last[8];
+	$aln_score=1 if($last[8] eq "-");
 	push(@{$cur_hits_score{$last[$CMP_COL]}},$aln_score);
+	push(@{$cur_pass_flag{$last[$CMP_COL]}},$cmp_pass_flag);
 
 	while($last[$CT_COL] eq $line[$CT_COL] && !(eof))
 		{
 		$cur_hits{$line[$CMP_COL]}++;
-		push(@{$cur_hits_score{$last[$CMP_COL]}},$aln_score);
-		$pass_flag = 0 if($line[10] eq "PASS");
+		push(@{$cur_hits_score{$line[$CMP_COL]}},$aln_score);
+		push(@{$cur_pass_flag{$line[$CMP_COL]}},$cmp_pass_flag);
+		$ct_pass_flag = 0 if($line[10] eq "PASS");
+		
 		$tmp_line=<MAPPED>;
-		$aln_score=$line[8];
-		$aln_score=1 if($line[8] eq "-");
 		chomp $tmp_line;
 		@line = split(/\t/,$tmp_line);
+		$cmp_pass_flag = 1;
+		$cmp_pass_flag = 0 if($line[10] eq "PASS");
+		$aln_score=$line[8];
+		$aln_score=1 if($line[8] eq "-");
 		}
 	
 	if(eof) ##If end of file process last two lines
 		{
 		if($line[$CT_COL] eq $last[$CT_COL])
 			{
-			$cur_hits{$line[$CMP_COL]}++ if($line[$CT_COL] eq $last[$CT_COL]);
-			push(@{$cur_hits_score{$last[$CMP_COL]}},$aln_score);
-			$pass_flag = 0 if($line[10] eq "PASS");	
+			$cur_hits{$line[$CMP_COL]}++;
+			push(@{$cur_hits_score{$line[$CMP_COL]}},$aln_score);
+			push(@{$cur_pass_flag{$line[$CMP_COL]}},$cmp_pass_flag);
+			$ct_pass_flag = 0 if($line[10] eq "PASS");	
 			}
-		else  ## Run normal loop on last line
+		else  ## Run normal loop on last line if unique
 			{
-			print "$cur_barcode\t";
-			print join(",",keys %cur_hits)."\t";
-			print join(",",values %cur_hits)."\t";	
-			$sum = 0;
-			for $key (keys %cur_hits)
-			{  
-  			$sum += $cur_hits{$key};
-			}
-			print $sum."\t";
+				$sum = 0;
+				@print_keys=();
+				@print_values=();
+				@print_score=();
+				@print_passflag=();
 	
-			$pass_flag = 1 if(scalar(keys %cur_hits) > 1);
-			print $pass_flag."\n";
-			%cur_hits = ();
-			@last = @line;
-			$pass_flag = 2;
-			$pass_flag = 0 if($last[10] eq "PASS");
+				for $key (keys %cur_hits)
+					{
+					push(@print_keys,$key);
+					push(@print_values, $cur_hits{$key});
+  					$sum += $cur_hits{$key};
+  	
+  					#print STDERR join (",",$key,@{$cur_pass_flag{$key}})."\n";   		
+  					@tmp_sort = @{$cur_pass_flag{$key}};
+  					@tmp_sort = sort {$a <=> $b} @{$cur_pass_flag{$key}} if(scalar @{$cur_pass_flag{$key}} > 1); 	
+  					push(@print_passflag, $tmp_sort[0]);
+  		
+  					@tmp_sort = @{$cur_hits_score{$key}};
+  					@tmp_sort = sort {$a <=> $b} @{$cur_hits_score{$key}} if(scalar @{$cur_hits_score{$key}} > 1);
+  					#print STDERR join (",",$key,@tmp_sort)."\n";
+  					push(@print_score,sprintf("%.3f",$tmp_sort[0]));
+					}
+				print "$cur_barcode\t";
+				print join(",",@print_keys)."\t";
+				print join(",",@print_values)."\t";		
+				print $sum."\t";
 	
-			$cur_barcode = $last[$CT_COL];
-			$cur_hits{$last[$CMP_COL]}++;
-			$cur_hits_score{$last[$CMP_COL]}+=$aln_score;
-			push(@{$cur_hits_score{$last[$CMP_COL]}},$aln_score);
+				$ct_pass_flag = 1 if(scalar(keys %cur_hits) > 1);
+				print $ct_pass_flag."\t";
+				print join(",",@print_passflag)."\t";
+				print join(",",@print_score)."\n";
+
+				%cur_hits = ();
+				%cur_hits_score = ();
+				%cur_pass_flag = ();
+			
+				@last = @line;
+				$ct_pass_flag = 2;
+				$ct_pass_flag = 0 if($last[10] eq "PASS");
+				$cmp_pass_flag = 1;
+				$cmp_pass_flag = 0 if($line[10] eq "PASS");
+				
+				$cur_barcode = $last[$CT_COL];
+				$cur_hits{$last[$CMP_COL]}++;
+				$aln_score=$last[8];
+				$aln_score=1 if($last[8] eq "-");
+				push(@{$cur_hits_score{$last[$CMP_COL]}},$aln_score);
+				push(@{$cur_pass_flag{$line[$CMP_COL]}},$cmp_pass_flag);
 			}
 		
 		}
-
 	
 
 
@@ -109,27 +148,32 @@ while (<MAPPED>)
 	@print_keys=();
 	@print_values=();
 	@print_score=();
+	@print_passflag=();
 	
 	for $key (keys %cur_hits)
 		{
 		push(@print_keys,$key);
 		push(@print_values, $cur_hits{$key});
   		$sum += $cur_hits{$key};
+  	
+  		#print STDERR join (",",$key,@{$cur_pass_flag{$key}})."\n";   		
+  		@tmp_sort = @{$cur_pass_flag{$key}};
+  		@tmp_sort = sort {$a <=> $b} @{$cur_pass_flag{$key}} if(scalar @{$cur_pass_flag{$key}} > 1); 	
+  		push(@print_passflag, $tmp_sort[0]);
   		
-  		push(@{$cur_hits_score{$key}},1);
-  		#@tmp_sort = @{$cur_hits_score{$key}};
-  		my @tmp_sort = sort {$a <=> $b} @{$cur_hits_score{$key}} if(scalar @{$cur_hits_score{$key}} > 1);
-  		
-  		print STDERR join (",",@print_score);
-  		push(@print_score,printf("%.3f",$tmp_sort[0]));
+  		@tmp_sort = @{$cur_hits_score{$key}};
+  		@tmp_sort = sort {$a <=> $b} @{$cur_hits_score{$key}} if(scalar @{$cur_hits_score{$key}} > 1);
+  		#print STDERR join (",",$key,@tmp_sort)."\n";
+  		push(@print_score,sprintf("%.3f",$tmp_sort[0]));
 		}
 	print "$cur_barcode\t";
 	print join(",",@print_keys)."\t";
 	print join(",",@print_values)."\t";		
 	print $sum."\t";
 	
-	$pass_flag = 1 if(scalar(keys %cur_hits) > 1);
-	print $pass_flag."\t";
+	$ct_pass_flag = 1 if(scalar(keys %cur_hits) > 1);
+	print $ct_pass_flag."\t";
+	print join(",",@print_passflag)."\t";
 	print join(",",@print_score)."\n";
 
 
@@ -137,5 +181,6 @@ while (<MAPPED>)
 	
 	%cur_hits = ();
 	%cur_hits_score = ();
+	%cur_pass_flag = ();
 	@last = @line;
 	}
