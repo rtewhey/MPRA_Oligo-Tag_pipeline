@@ -26,7 +26,8 @@ my %cur_hits;
 my %cur_hits_score;
 my @print_score;
 my @tmp_sort;
-
+my @print_keys;
+my @print_values;
 
 my $key;
 my $sum;
@@ -113,7 +114,7 @@ while (<MAPPED>)
   		
   		my @tmp_sort = sort {$a <=> $b} @{$cur_hits_score{$key}};
   		
-  		push(@print_score,printf("%.3f",$tmp_sort[0]);
+  		push(@print_score,printf("%.3f",$tmp_sort[0]));
 		}
 	print "$cur_barcode\t";
 	print join(",",@print_keys)."\t";
