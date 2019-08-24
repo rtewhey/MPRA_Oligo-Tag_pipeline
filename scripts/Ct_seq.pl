@@ -32,13 +32,15 @@ my @print_values;
 my $key;
 my $sum;
 my $pass_flag; # 0 = ok, 1 = collision, 2 = other failure (mapping)
-
+my $aln_score;
 
 while (<MAPPED>)
 	{
 	$pass_flag = 2;
 	chomp;
 	my @line = split(/\t/);
+	$aln_score=$line[8];
+	$aln_score=1 if($line[8]=="-");
 	
 	if($first == 0)
 		{
@@ -51,14 +53,16 @@ while (<MAPPED>)
 	
 	$cur_barcode = $last[$CT_COL];
 	$cur_hits{$last[$CMP_COL]}++;
-	push(@{$cur_hits_score{$last[$CMP_COL]}},$line[8]);
+	push(@{$cur_hits_score{$last[$CMP_COL]}},$aln_score);
 
 	while($last[$CT_COL] eq $line[$CT_COL] && !(eof))
 		{
 		$cur_hits{$line[$CMP_COL]}++;
-		push(@{$cur_hits_score{$last[$CMP_COL]}},$line[8]);
+		push(@{$cur_hits_score{$last[$CMP_COL]}},$aln_score);
 		$pass_flag = 0 if($line[10] eq "PASS");
 		$tmp_line=<MAPPED>;
+		$aln_score=$line[8];
+		$aln_score=1 if($line[8]=="-");
 		chomp $tmp_line;
 		@line = split(/\t/,$tmp_line);
 		}
@@ -68,7 +72,7 @@ while (<MAPPED>)
 		if($line[$CT_COL] eq $last[$CT_COL])
 			{
 			$cur_hits{$line[$CMP_COL]}++ if($line[$CT_COL] eq $last[$CT_COL]);
-			push(@{$cur_hits_score{$last[$CMP_COL]}},$line[8]);
+			push(@{$cur_hits_score{$last[$CMP_COL]}},$aln_score);
 			$pass_flag = 0 if($line[10] eq "PASS");	
 			}
 		else  ## Run normal loop on last line
@@ -92,8 +96,8 @@ while (<MAPPED>)
 	
 			$cur_barcode = $last[$CT_COL];
 			$cur_hits{$last[$CMP_COL]}++;
-			$cur_hits_score{$last[$CMP_COL]}+=$line[8];
-			push(@{$cur_hits_score{$last[$CMP_COL]}},$line[8]);
+			$cur_hits_score{$last[$CMP_COL]}+=$aln_score;
+			push(@{$cur_hits_score{$last[$CMP_COL]}},$aln_score);
 			}
 		
 		}
