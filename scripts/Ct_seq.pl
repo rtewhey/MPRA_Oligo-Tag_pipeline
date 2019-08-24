@@ -40,7 +40,7 @@ while (<MAPPED>)
 	chomp;
 	my @line = split(/\t/);
 	$aln_score=$line[8];
-	$aln_score=1 if($line[8]=="-");
+	$aln_score=1 if($line[8] eq "-");
 	
 	if($first == 0)
 		{
@@ -62,7 +62,7 @@ while (<MAPPED>)
 		$pass_flag = 0 if($line[10] eq "PASS");
 		$tmp_line=<MAPPED>;
 		$aln_score=$line[8];
-		$aln_score=1 if($line[8]=="-");
+		$aln_score=1 if($line[8] eq "-");
 		chomp $tmp_line;
 		@line = split(/\t/,$tmp_line);
 		}
