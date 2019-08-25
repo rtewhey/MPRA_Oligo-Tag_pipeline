@@ -40,9 +40,6 @@ my $aln_score;
 
 while (<MAPPED>)
 	{
-	$ct_pass_flag = 2;
-	$cmp_pass_flag = 2;
-
 	chomp;
 	my @line = split(/\t/);
 	
@@ -52,7 +49,9 @@ while (<MAPPED>)
 		$first = 1;
 		next;
 		}
-
+	
+	$ct_pass_flag = 2;
+	$cmp_pass_flag = 2;
 	$ct_pass_flag = 0 if($last[10] eq "PASS");
 	$cmp_pass_flag = 0 if($last[10] eq "PASS");
 	
@@ -65,6 +64,11 @@ while (<MAPPED>)
 
 	while($last[$CT_COL] eq $line[$CT_COL] && !(eof))
 		{
+		$cmp_pass_flag = 2;
+		$cmp_pass_flag = 0 if($line[10] eq "PASS");
+		$aln_score=$line[8];
+		$aln_score=1 if($line[8] eq "-");
+		
 		$cur_hits{$line[$CMP_COL]}++;
 		push(@{$cur_hits_score{$line[$CMP_COL]}},$aln_score);
 		push(@{$cur_pass_flag{$line[$CMP_COL]}},$cmp_pass_flag);
@@ -73,10 +77,6 @@ while (<MAPPED>)
 		$tmp_line=<MAPPED>;
 		chomp $tmp_line;
 		@line = split(/\t/,$tmp_line);
-		$cmp_pass_flag = 2;
-		$cmp_pass_flag = 0 if($line[10] eq "PASS");
-		$aln_score=$line[8];
-		$aln_score=1 if($line[8] eq "-");
 		}
 	
 	if(eof) ##If end of file process last two lines
@@ -156,14 +156,14 @@ while (<MAPPED>)
 		push(@print_values, $cur_hits{$key});
   		$sum += $cur_hits{$key};
   	
-  		#print STDERR join (",",$key,@{$cur_pass_flag{$key}})."\n";   		
+  		print  join (",",$key,@{$cur_pass_flag{$key}})."\n";   		
   		@tmp_sort = @{$cur_pass_flag{$key}};
   		@tmp_sort = sort {$a <=> $b} @{$cur_pass_flag{$key}} if(scalar @{$cur_pass_flag{$key}} > 1); 	
   		push(@print_passflag, $tmp_sort[0]);
   		
+  		print  join (",",$key,@{$cur_hits_score{$key}})."\n";
   		@tmp_sort = @{$cur_hits_score{$key}};
   		@tmp_sort = sort {$a <=> $b} @{$cur_hits_score{$key}} if(scalar @{$cur_hits_score{$key}} > 1);
-  		#print STDERR join (",",$key,@tmp_sort)."\n";
   		push(@print_score,sprintf("%.3f",$tmp_sort[0]));
 		}
 	print "$cur_barcode\t";
