@@ -34,14 +34,14 @@ my @print_passflag;
 my $key;
 my $sum;
 my $ct_pass_flag; # 0 = ok, 1 = collision, 2 = other failure (mapping)
-my $cmp_pass_flag; #0 = ok, 1 = failure
+my $cmp_pass_flag; #0 = ok, 2 = mapping
 
 my $aln_score;
 
 while (<MAPPED>)
 	{
 	$ct_pass_flag = 2;
-	$cmp_pass_flag = 1;
+	$cmp_pass_flag = 2;
 
 	chomp;
 	my @line = split(/\t/);
@@ -73,7 +73,7 @@ while (<MAPPED>)
 		$tmp_line=<MAPPED>;
 		chomp $tmp_line;
 		@line = split(/\t/,$tmp_line);
-		$cmp_pass_flag = 1;
+		$cmp_pass_flag = 2;
 		$cmp_pass_flag = 0 if($line[10] eq "PASS");
 		$aln_score=$line[8];
 		$aln_score=1 if($line[8] eq "-");
@@ -129,7 +129,7 @@ while (<MAPPED>)
 				@last = @line;
 				$ct_pass_flag = 2;
 				$ct_pass_flag = 0 if($last[10] eq "PASS");
-				$cmp_pass_flag = 1;
+				$cmp_pass_flag = 2;
 				$cmp_pass_flag = 0 if($line[10] eq "PASS");
 				
 				$cur_barcode = $last[$CT_COL];
