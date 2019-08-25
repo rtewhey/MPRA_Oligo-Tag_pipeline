@@ -15,8 +15,6 @@ my @cov;
 my @pass;
 my @aln;
 
-#my @pass;
-
 my $max;
 my $i;
 my $keep;

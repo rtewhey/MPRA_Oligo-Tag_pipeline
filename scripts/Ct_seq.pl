@@ -156,12 +156,12 @@ while (<MAPPED>)
 		push(@print_values, $cur_hits{$key});
   		$sum += $cur_hits{$key};
   	
-  		print  join (",",$key,@{$cur_pass_flag{$key}})."\n";   		
+  		#print STDERR join (",",$key,@{$cur_pass_flag{$key}})."\n";   		
   		@tmp_sort = @{$cur_pass_flag{$key}};
   		@tmp_sort = sort {$a <=> $b} @{$cur_pass_flag{$key}} if(scalar @{$cur_pass_flag{$key}} > 1); 	
   		push(@print_passflag, $tmp_sort[0]);
   		
-  		print  join (",",$key,@{$cur_hits_score{$key}})."\n";
+  		#print STDERR join (",",$key,@{$cur_hits_score{$key}})."\n";
   		@tmp_sort = @{$cur_hits_score{$key}};
   		@tmp_sort = sort {$a <=> $b} @{$cur_hits_score{$key}} if(scalar @{$cur_hits_score{$key}} > 1);
   		push(@print_score,sprintf("%.3f",$tmp_sort[0]));
