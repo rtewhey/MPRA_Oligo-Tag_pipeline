@@ -23,13 +23,19 @@ my @next;
 my $cur_barcode;
 my %cur_hits;
 
-my %cur_hits_score;
 my %cur_pass_flag;
+my %cur_hits_score;
+my %cur_cigar;
+my %cur_mdtag;
+
 my @print_score;
+my @tmp_sort_idx;
 my @tmp_sort;
 my @print_keys;
 my @print_values;
 my @print_passflag;
+my @print_cigar;
+my @print_md;
 
 my $key;
 my $sum;
@@ -37,6 +43,8 @@ my $ct_pass_flag; # 0 = ok, 1 = collision, 2 = other failure (mapping)
 my $cmp_pass_flag; #0 = ok, 2 = mapping
 
 my $aln_score;
+my $cigar;
+my $mdtag;
 
 while (<MAPPED>)
 	{
@@ -61,6 +69,10 @@ while (<MAPPED>)
 	$aln_score=1 if($last[8] eq "-");
 	push(@{$cur_hits_score{$last[$CMP_COL]}},$aln_score);
 	push(@{$cur_pass_flag{$last[$CMP_COL]}},$cmp_pass_flag);
+	$cigar = $last[7];
+	$mdtag = $last[12];
+	push(@{$cur_cigar{$last[$CMP_COL]}},$cigar);
+	push(@{$cur_mdtag{$last[$CMP_COL]}},$mdtag);
 
 	while($last[$CT_COL] eq $line[$CT_COL] && !(eof))
 		{
@@ -73,6 +85,11 @@ while (<MAPPED>)
 		push(@{$cur_hits_score{$line[$CMP_COL]}},$aln_score);
 		push(@{$cur_pass_flag{$line[$CMP_COL]}},$cmp_pass_flag);
 		$ct_pass_flag = 0 if($line[10] eq "PASS");
+
+		$cigar = $line[7];
+		$mdtag = $line[12];
+		push(@{$cur_cigar{$line[$CMP_COL]}},$cigar);
+		push(@{$cur_mdtag{$line[$CMP_COL]}},$mdtag);
 		
 		$tmp_line=<MAPPED>;
 		chomp $tmp_line;
@@ -86,6 +103,8 @@ while (<MAPPED>)
 			$cur_hits{$line[$CMP_COL]}++;
 			push(@{$cur_hits_score{$line[$CMP_COL]}},$aln_score);
 			push(@{$cur_pass_flag{$line[$CMP_COL]}},$cmp_pass_flag);
+			push(@{$cur_cigar{$line[$CMP_COL]}},$cigar);
+			push(@{$cur_mdtag{$line[$CMP_COL]}},$mdtag);
 			$ct_pass_flag = 0 if($line[10] eq "PASS");	
 			}
 		else  ## Run normal loop on last line if unique
@@ -95,6 +114,8 @@ while (<MAPPED>)
 				@print_values=();
 				@print_score=();
 				@print_passflag=();
+				@print_cigar=();
+				@print_md=();
 	
 				for $key (keys %cur_hits)
 					{
@@ -102,15 +123,25 @@ while (<MAPPED>)
 					push(@print_values, $cur_hits{$key});
   					$sum += $cur_hits{$key};
   	
+  					#Pick the oligo with the best alignment score.
+  					@tmp_sort_idx = 0..$#{$cur_hits_score{$key}};
+  					@tmp_sort_idx = sort { ${$cur_hits_score{$key}}[$a] <=> ${$cur_hits_score{$key}}[$b] } 0..$#{$cur_hits_score{$key}} if(scalar @{$cur_hits_score{$key}} > 1);
+  	
   					#print STDERR join (",",$key,@{$cur_pass_flag{$key}})."\n";   		
-  					@tmp_sort = @{$cur_pass_flag{$key}};
-  					@tmp_sort = sort {$a <=> $b} @{$cur_pass_flag{$key}} if(scalar @{$cur_pass_flag{$key}} > 1); 	
+  					@tmp_sort = @{$cur_pass_flag{$key}}[@tmp_sort_idx];
+  					#@tmp_sort = sort {$a <=> $b} @{$cur_pass_flag{$key}} if(scalar @{$cur_pass_flag{$key}} > 1); 	
   					push(@print_passflag, $tmp_sort[0]);
   		
-  					@tmp_sort = @{$cur_hits_score{$key}};
-  					@tmp_sort = sort {$a <=> $b} @{$cur_hits_score{$key}} if(scalar @{$cur_hits_score{$key}} > 1);
-  					#print STDERR join (",",$key,@tmp_sort)."\n";
+  					#print STDERR join (",",$key,@{$cur_hits_score{$key}})."\n";
+  					@tmp_sort = @{$cur_hits_score{$key}}[@tmp_sort_idx];
+  					#@tmp_sort = sort {$a <=> $b} @{$cur_hits_score{$key}} if(scalar @{$cur_hits_score{$key}} > 1);
   					push(@print_score,sprintf("%.3f",$tmp_sort[0]));
+  		
+  					@tmp_sort = @{$cur_cigar{$key}}[@tmp_sort_idx];
+  					push(@print_cigar, $tmp_sort[0]);
+  		
+  					@tmp_sort = @{$cur_mdtag{$key}}[@tmp_sort_idx];
+  					push(@print_md, $tmp_sort[0]);
 					}
 				print "$cur_barcode\t";
 				print join(",",@print_keys)."\t";
@@ -120,24 +151,34 @@ while (<MAPPED>)
 				$ct_pass_flag = 1 if(scalar(keys %cur_hits) > 1);
 				print $ct_pass_flag."\t";
 				print join(",",@print_passflag)."\t";
-				print join(",",@print_score)."\n";
+				print join(",",@print_score)."\t";
+				print join(",",@print_cigar)."\t";
+				print join(",",@print_md)."\n";
 
 				%cur_hits = ();
 				%cur_hits_score = ();
 				%cur_pass_flag = ();
-			
+				%cur_cigar = ();
+				%cur_mdtag = ();
+				
 				@last = @line;
 				$ct_pass_flag = 2;
 				$ct_pass_flag = 0 if($last[10] eq "PASS");
 				$cmp_pass_flag = 2;
-				$cmp_pass_flag = 0 if($line[10] eq "PASS");
+				$cmp_pass_flag = 0 if($last[10] eq "PASS");
 				
 				$cur_barcode = $last[$CT_COL];
 				$cur_hits{$last[$CMP_COL]}++;
 				$aln_score=$last[8];
 				$aln_score=1 if($last[8] eq "-");
 				push(@{$cur_hits_score{$last[$CMP_COL]}},$aln_score);
-				push(@{$cur_pass_flag{$line[$CMP_COL]}},$cmp_pass_flag);
+				push(@{$cur_pass_flag{$last[$CMP_COL]}},$cmp_pass_flag);
+				
+				$cigar = $last[7];
+				$mdtag = $last[12];
+				push(@{$cur_cigar{$last[$CMP_COL]}},$cigar);
+				push(@{$cur_mdtag{$last[$CMP_COL]}},$mdtag);
+			
 			}
 		
 		}
@@ -149,22 +190,34 @@ while (<MAPPED>)
 	@print_values=();
 	@print_score=();
 	@print_passflag=();
-	
+	@print_cigar=();
+	@print_md=();
+		
 	for $key (keys %cur_hits)
 		{
 		push(@print_keys,$key);
 		push(@print_values, $cur_hits{$key});
   		$sum += $cur_hits{$key};
   	
+  		#Pick the oligo with the best alignment score.
+  		@tmp_sort_idx = 0..$#{$cur_hits_score{$key}};
+  		@tmp_sort_idx = sort { ${$cur_hits_score{$key}}[$a] <=> ${$cur_hits_score{$key}}[$b] } 0..$#{$cur_hits_score{$key}} if(scalar @{$cur_hits_score{$key}} > 1);
+  	
   		#print STDERR join (",",$key,@{$cur_pass_flag{$key}})."\n";   		
-  		@tmp_sort = @{$cur_pass_flag{$key}};
-  		@tmp_sort = sort {$a <=> $b} @{$cur_pass_flag{$key}} if(scalar @{$cur_pass_flag{$key}} > 1); 	
+  		@tmp_sort = @{$cur_pass_flag{$key}}[@tmp_sort_idx];
+  		#@tmp_sort = sort {$a <=> $b} @{$cur_pass_flag{$key}} if(scalar @{$cur_pass_flag{$key}} > 1); 	
   		push(@print_passflag, $tmp_sort[0]);
   		
   		#print STDERR join (",",$key,@{$cur_hits_score{$key}})."\n";
-  		@tmp_sort = @{$cur_hits_score{$key}};
-  		@tmp_sort = sort {$a <=> $b} @{$cur_hits_score{$key}} if(scalar @{$cur_hits_score{$key}} > 1);
+  		@tmp_sort = @{$cur_hits_score{$key}}[@tmp_sort_idx];
+  		#@tmp_sort = sort {$a <=> $b} @{$cur_hits_score{$key}} if(scalar @{$cur_hits_score{$key}} > 1);
   		push(@print_score,sprintf("%.3f",$tmp_sort[0]));
+  		
+  		@tmp_sort = @{$cur_cigar{$key}}[@tmp_sort_idx];
+  		push(@print_cigar, $tmp_sort[0]);
+  		
+  		@tmp_sort = @{$cur_mdtag{$key}}[@tmp_sort_idx];
+  		push(@print_md, $tmp_sort[0]);
 		}
 	print "$cur_barcode\t";
 	print join(",",@print_keys)."\t";
@@ -174,13 +227,16 @@ while (<MAPPED>)
 	$ct_pass_flag = 1 if(scalar(keys %cur_hits) > 1);
 	print $ct_pass_flag."\t";
 	print join(",",@print_passflag)."\t";
-	print join(",",@print_score)."\n";
-
+	print join(",",@print_score)."\t";
+	print join(",",@print_cigar)."\t";
+	print join(",",@print_md)."\n";
 
 	
 	
 	%cur_hits = ();
 	%cur_hits_score = ();
 	%cur_pass_flag = ();
+	%cur_cigar = ();
+	%cur_mdtag = ();
 	@last = @line;
 	}
