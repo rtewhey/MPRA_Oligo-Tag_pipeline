@@ -14,6 +14,8 @@ my @ids;
 my @cov;
 my @pass;
 my @aln;
+my @cigar;
+my @md;
 
 my $max;
 my $i;
@@ -29,6 +31,8 @@ while (<MAPPED>)
 	my @cov = split(/,/,$line[2]);
 	my @pass = split(/,/,$line[5]);
 	my @aln = split(/,/,$line[6]);
+	my @cigar = split(/,/,$line[7]);
+	my @md = split(/,/,$line[8]);
 
 	if(scalar(@ids) > 1)
 		{
@@ -51,7 +55,7 @@ while (<MAPPED>)
 				$keep = 1;
 				}
 			}	
-		print join("\t",$line[0],$ids[$max_idx],$cov[$max_idx],$line[3],0,$pass[$max_idx],$aln[$max_idx])."\n" if($keep==0);	
+		print join("\t",$line[0],$ids[$max_idx],$cov[$max_idx],$line[3],0,$pass[$max_idx],$aln[$max_idx],$cigar[$max_idx],$md[$max_idx])."\n" if($keep==0);	
 		print join("\t",@line)."\n" if($keep==1);	
 
 		}
