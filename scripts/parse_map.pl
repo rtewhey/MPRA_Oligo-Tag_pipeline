@@ -55,7 +55,7 @@ while (<MAPPED>)
 				$keep = 1;
 				}
 			}	
-		print join("\t",$line[0],$ids[$max_idx],$cov[$max_idx],$line[3],0,$pass[$max_idx],$aln[$max_idx],$cigar[$max_idx],$md[$max_idx])."\n" if($keep==0);	
+		print join("\t",$line[0],$ids[$max_idx],$cov[$max_idx],$line[3],$pass[$max_idx],$pass[$max_idx],$aln[$max_idx],$cigar[$max_idx],$md[$max_idx])."\n" if($keep==0);	
 		print join("\t",@line)."\n" if($keep==1);	
 
 		}
