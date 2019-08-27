@@ -27,6 +27,7 @@ my %cur_pass_flag;
 my %cur_hits_score;
 my %cur_cigar;
 my %cur_mdtag;
+my %cur_pos;
 
 my @print_score;
 my @tmp_sort_idx;
@@ -36,6 +37,7 @@ my @print_values;
 my @print_passflag;
 my @print_cigar;
 my @print_md;
+my @print_pos;
 
 my $key;
 my $sum;
@@ -45,6 +47,7 @@ my $cmp_pass_flag; #0 = ok, 2 = mapping
 my $aln_score;
 my $cigar;
 my $mdtag;
+my $pos;
 
 while (<MAPPED>)
 	{
@@ -71,8 +74,10 @@ while (<MAPPED>)
 	push(@{$cur_pass_flag{$last[$CMP_COL]}},$cmp_pass_flag);
 	$cigar = $last[7];
 	$mdtag = $last[12];
+	$pos = $last[13];
 	push(@{$cur_cigar{$last[$CMP_COL]}},$cigar);
 	push(@{$cur_mdtag{$last[$CMP_COL]}},$mdtag);
+	push(@{$cur_pos{$last[$CMP_COL]}},$pos);
 
 	while($last[$CT_COL] eq $line[$CT_COL] && !(eof))
 		{
@@ -88,8 +93,10 @@ while (<MAPPED>)
 
 		$cigar = $line[7];
 		$mdtag = $line[12];
+		$pos = $line[13];
 		push(@{$cur_cigar{$line[$CMP_COL]}},$cigar);
 		push(@{$cur_mdtag{$line[$CMP_COL]}},$mdtag);
+		push(@{$cur_pos{$line[$CMP_COL]}},$pos);
 		
 		$tmp_line=<MAPPED>;
 		chomp $tmp_line;
@@ -105,6 +112,8 @@ while (<MAPPED>)
 			push(@{$cur_pass_flag{$line[$CMP_COL]}},$cmp_pass_flag);
 			push(@{$cur_cigar{$line[$CMP_COL]}},$cigar);
 			push(@{$cur_mdtag{$line[$CMP_COL]}},$mdtag);
+			push(@{$cur_pos{$line[$CMP_COL]}},$pos);
+
 			$ct_pass_flag = 0 if($line[10] eq "PASS");	
 			}
 		else  ## Run normal loop on last line if unique
@@ -116,7 +125,8 @@ while (<MAPPED>)
 				@print_passflag=();
 				@print_cigar=();
 				@print_md=();
-	
+				@print_pos=();
+				
 				for $key (keys %cur_hits)
 					{
 					push(@print_keys,$key);
@@ -142,6 +152,9 @@ while (<MAPPED>)
   		
   					@tmp_sort = @{$cur_mdtag{$key}}[@tmp_sort_idx];
   					push(@print_md, $tmp_sort[0]);
+  					
+  					@tmp_sort = @{$cur_pos{$key}}[@tmp_sort_idx];
+  					push(@print_pos, $tmp_sort[0]);
 					}
 				print "$cur_barcode\t";
 				print join(",",@print_keys)."\t";
@@ -153,13 +166,15 @@ while (<MAPPED>)
 				print join(",",@print_passflag)."\t";
 				print join(",",@print_score)."\t";
 				print join(",",@print_cigar)."\t";
-				print join(",",@print_md)."\n";
+				print join(",",@print_md)."\t";
+				print join(",",@print_pos)."\n";
 
 				%cur_hits = ();
 				%cur_hits_score = ();
 				%cur_pass_flag = ();
 				%cur_cigar = ();
 				%cur_mdtag = ();
+				%cur_pos = ();
 				
 				@last = @line;
 				$ct_pass_flag = 2;
@@ -176,8 +191,10 @@ while (<MAPPED>)
 				
 				$cigar = $last[7];
 				$mdtag = $last[12];
+				$pos = $last[13]; 
 				push(@{$cur_cigar{$last[$CMP_COL]}},$cigar);
 				push(@{$cur_mdtag{$last[$CMP_COL]}},$mdtag);
+				push(@{$cur_pos{$last[$CMP_COL]}},$pos);
 			
 			}
 		
@@ -192,6 +209,7 @@ while (<MAPPED>)
 	@print_passflag=();
 	@print_cigar=();
 	@print_md=();
+	@print_pos=();
 		
 	for $key (keys %cur_hits)
 		{
@@ -218,6 +236,9 @@ while (<MAPPED>)
   		
   		@tmp_sort = @{$cur_mdtag{$key}}[@tmp_sort_idx];
   		push(@print_md, $tmp_sort[0]);
+  		
+		@tmp_sort = @{$cur_pos{$key}}[@tmp_sort_idx];
+		push(@print_pos, $tmp_sort[0]);
 		}
 	print "$cur_barcode\t";
 	print join(",",@print_keys)."\t";
@@ -229,7 +250,8 @@ while (<MAPPED>)
 	print join(",",@print_passflag)."\t";
 	print join(",",@print_score)."\t";
 	print join(",",@print_cigar)."\t";
-	print join(",",@print_md)."\n";
+	print join(",",@print_md)."\t";
+	print join(",",@print_pos)."\n";
 
 	
 	
@@ -238,5 +260,6 @@ while (<MAPPED>)
 	%cur_pass_flag = ();
 	%cur_cigar = ();
 	%cur_mdtag = ();
+	%cur_pos = ();
 	@last = @line;
 	}
