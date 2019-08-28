@@ -16,7 +16,7 @@ flash2 -r 150 -f 274 -s 20 -o ${ID}.merged -t $THREADS $READ_A $READ_B > ${ID}.m
 perl ${INSTALL_PATH}/fq2RCfa.pl ${ID}.merged.extendedFrags.fastq > ${ID}.merged.rc.fasta
 perl ${INSTALL_PATH}/matchadapter.pl ${ID}.merged.rc.fasta ${ID}.merged.rc
 awk '{print ">"$1"#"$5"\n"$4}' ${ID}.merged.rc.match > ${ID}.merged.rc.match.enh.fa
-minimap2 --for-only -Y --secondary=no -t $THREADS -sr --end-bonus 9 -k10 --MD --eqx --cs=long -c -a $REF ${ID}.merged.rc.match.enh.fa > ${ID}.merged.rc.match.enh.sam 2> ${ID}.merged.rc.match.enh.log
+minimap2 --for-only -Y --secondary=no -t $THREADS -m 10 -n 1 --end-bonus 12 -O 5 -E 1 -k 10 -2K50m --MD --eqx --cs=long -c-a $REF ${ID}.merged.rc.match.enh.fa > ${ID}.merged.rc.match.enh.sam 2> ${ID}.merged.rc.match.enh.log
 perl ${INSTALL_PATH}/SAM2MPRA.pl -C -B ${ID}.merged.rc.match.enh.sam ${ID}.merged.rc.match.enh.mapped  > ${ID}.merged.rc.match.enh.mapped.log 2>&1
 
 grep PASS ${ID}.merged.rc.match.enh.mapped  | sort -S16G -k4 > ${ID}.merged.rc.match.enh.mapped.enh.pass.sort
