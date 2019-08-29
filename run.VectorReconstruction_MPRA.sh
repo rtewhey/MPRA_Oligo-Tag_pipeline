@@ -9,8 +9,8 @@ INSTALL_PATH=" /projects/tewher/bin/MPRA_Oligo-Tag_pipeline/scripts"
 REF=$1
 ID=$2
 THREADS=$3
-READA=$4
-READB=$5
+READ_A=$4
+READ_B=$5
 
 flash2 -r 150 -f 274 -s 20 -o ${ID}.merged -t $THREADS $READ_A $READ_B > ${ID}.merged.log
 perl ${INSTALL_PATH}/fq2RCfa.pl ${ID}.merged.extendedFrags.fastq > ${ID}.merged.rc.fasta
