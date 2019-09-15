@@ -24,6 +24,7 @@ sort -S16G -k2 ${ID}.merged.rc.match.enh.mapped > ${ID}.merged.rc.match.enh.mapp
 perl ${INSTALL_PATH}/Ct_seq.pl ${ID}.merged.rc.match.enh.mapped.barcode.sort 2 4 > ${ID}.merged.rc.match.enh.mapped.barcode.ct
 perl ${INSTALL_PATH}/Ct_seq.pl ${ID}.merged.rc.match.enh.mapped.enh.pass.sort 4 2 > ${ID}.merged.rc.match.enh.mapped.enh.pass.ct
 awk '{ct[$4]++}END{for (i in ct)print i "\t" ct[i]}' ${ID}.merged.rc.match.enh.mapped.barcode.ct | sort -k1n > ${ID}.merged.rc.match.enh.mapped.barcode.ct.hist
-preseq lc_extrap -H ${ID}.merged.rc.match.enh.mapped.barcode.ct.hist -o ${ID}.merged.rc.match.enh.mapped.barcode.ct.hist.preseq -s 10000000 -n 1000 -e 100000000
-awk '($5 == 0)' ${ID}.merged.rc.match.enh.mapped.barcode.ct | awk '{ct[$2]++}END{for(i in ct)print i "\t" ct[i]}' > tmp.out
+preseq lc_extrap -H ${ID}.merged.rc.match.enh.mapped.barcode.ct.hist -o ${ID}.merged.rc.match.enh.mapped.barcode.ct.hist.preseq -s 25000000 -n 1000 -e 1000000000
+awk '($5 == 0)' ${ID}.merged.rc.match.enh.mapped.barcode.ct | awk '{ct[$2]++;cov[$2]+=$4;}END{for(i in ct)print i "\t" ct[i] "\t" cov[i]}' > ${ID}.merged.rc.match.enh.mapped.barcode.ct.plothist
 perl ${INSTALL_PATH}/parse_map.pl ${ID}.merged.rc.match.enh.mapped.barcode.ct > ${ID}.merged.rc.match.enh.mapped.barcode.ct.parsed
+Rscript --vanilla ${INSTALL_PATH}/plot_barcode_stats.r $ID $REF
