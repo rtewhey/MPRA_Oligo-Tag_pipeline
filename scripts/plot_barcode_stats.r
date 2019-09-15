@@ -76,6 +76,10 @@ plotD<-ggplot(flag.ct, aes(x = row,y = Freq, fill = Flag)) +
   geom_text(aes(label = percent), position = position_stack(vjust = 0.5))
 
 
+#length(readLines(paste0(prefix,".merged.extendedFrags.fastq")))
+#length(readLines(paste0(prefix,".merged.notCombined_1.fastq")))
+#length(readLines(paste0(prefix,".merged.rc.match")))
+
 seen<-nrow(count.hist)
 total<-nrow(fasta)
 per<-round(seen/total,4)*100
