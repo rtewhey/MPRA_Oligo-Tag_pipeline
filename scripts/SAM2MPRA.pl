@@ -11,7 +11,7 @@ use Getopt::Std;
 ##################################
 
 my %options=();
-getopts('C', \%options);
+getopts('CB', \%options);
 
 #####
 #

@@ -3,7 +3,10 @@
 use strict;
 use warnings;
 use Text::LevenshteinXS qw(distance);
- 
+use Getopt::Std;
+
+my %options=();
+getopts('B:', \%options);
  
 my $fasta = $ARGV[0];
 my $out = $ARGV[1];
@@ -11,6 +14,9 @@ my $out = $ARGV[1];
 open (FASTA, "$fasta") or die("ERROR: can not read file ($fasta): $!\n");
 open (MATCH, ">$out".".match") or die("ERROR: can not create $out .matched: $!\n");
 open (REJECT, ">$out".".reject") or die("ERROR: can not create $out .rejected: $!\n");
+
+my $L2_SEQ_BARCODE_LEN = $options{B} || 20;
+print STDERR "Barcode length: $L2_SEQ_BARCODE_LEN\n";
 
 
 my $no_L1_match = 1;
@@ -22,7 +28,6 @@ my $L1_SEQ_ANCHOR_POS = 14;
 my $L2_SEQ = "CACTGCGGCTCCTGCGATCGCGTCGACGAACCTCTAGA";  #Change substr length if this is not 26bp
 my $L2_SEQ_ANCHOR = "GA";
 my $L2_SEQ_LEFT_ANCHOR = "CA";
-my $L2_SEQ_BARCODE_LEN= 20;
 my $L2_SEQ_POS = 216;
 
 my $MIN_SEQ_SIZE = 100;
